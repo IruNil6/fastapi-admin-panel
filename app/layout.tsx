@@ -14,7 +14,7 @@ const robotoMono = Roboto_Mono({
 
 export const metadata: Metadata = {
   title: "CSSC-Admin",
-  description: "Admin app for administrating database",
+  description: "Admin page for administrating database of CSSC",
   applicationName: "CSSC-Admin",
 };
 
