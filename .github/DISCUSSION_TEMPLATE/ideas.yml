@@ -1,0 +1,14 @@
+body:
+  - type: textarea
+    attributes:
+      label: Describe your idea
+      description: A clear and concise description of your idea.
+      placeholder: "A clear and concise description of your idea."
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Proposal
+      description: How should this feature be implemented? Are you interested in contributing?
+    validations:
+      required: true
