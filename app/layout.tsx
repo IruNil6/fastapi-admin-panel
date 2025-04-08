@@ -13,9 +13,10 @@ const robotoMono = Roboto_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CSSC-Admin",
-  description: "Admin page for administrating database of CSSC",
-  applicationName: "CSSC-Admin",
+  title: "FastApi-Admin-Panel",
+  description: "Admin Panel for administrating database of FastAPI on NextTS",
+  authors: [{ name: "IruNil", url: "https://github.com/IruNil6" }],
+  applicationName: "FastApi-Admin-Panel",
 };
 
 export default function RootLayout({ children, }: Readonly<{ children: React.ReactNode; }>) {
