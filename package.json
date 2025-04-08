@@ -1,6 +1,7 @@
 {
-  "name": "cssc-admin",
-  "version": "0.1.0",
+  "name": "fastapi-admin-panel",
+  "author": {"email": "irunil@raycynix.com", "name": "IruNil", "username": "IruNil6"},
+  "version": "0.2.0",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
