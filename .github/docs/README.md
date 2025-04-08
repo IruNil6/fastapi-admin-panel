@@ -4,7 +4,3 @@
 This project was created to administer databases for my local Fast API application
 
 This project is written in [Next.js](https://nextjs.org)
-
-# Usage
-## Feel free to contribute with this repo
-You can use this repository for any project, commercial or non-commercial.
