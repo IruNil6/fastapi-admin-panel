@@ -1,0 +1,126 @@
+name: Build NextTS Release
+
+on:
+  push:
+    branches:
+      - release
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu]
+    
+    name: Build NextTS Project for ${{ matrix.os }}
+
+    runs-on: ${{ matrix.os }}-latest
+    
+    outputs:
+      version: ${{ steps.package.outputs.version }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+        
+      - name: Get version number from package
+        id: package
+        uses: codex-team/action-nodejs-package-info@v1.1
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+
+      - name: NPM install
+        run: npm install
+      - name: NPM build
+        run: npm run build
+
+      - name: Archive release
+        uses: papeloto/action-zip@v1
+        with:
+          files: ./build
+          dest: ./artifacts/${{ matrix.os }}-release-v${{ steps.package.outputs.version }}.zip
+            
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.os }}-release-v${{ steps.package.outputs.version }}
+          path: ./artifacts/${{ matrix.os }}-release-v${{ steps.package.outputs.version }}.zip
+          retention-days: 30
+    
+  draft:
+    strategy:
+      matrix:
+        os: [ubuntu]
+
+    name: Setting up assets and adding draft for ${{ matrix.os }}
+
+    permissions:
+      contents: write
+      pull-requests: read
+
+    runs-on: ${{ matrix.os }}-latest
+
+    needs:
+      - build
+    
+    outputs:
+      release_id: ${{ steps.release-drafter.outputs.id }}
+
+    steps:
+      - name: Download Build Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.os }}-release-v${{ needs.build.outputs.version }}
+
+      - name: Create release version
+        id: release-drafter
+        uses: release-drafter/release-drafter@master
+        with:
+          disable-autolabeler: true
+          version: ${{ needs.build.outputs.version }}
+          publish: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  
+      - name: Upload Release Assets
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.release-drafter.outputs.upload_url }}
+          asset_path: ./${{ matrix.os }}-release-v${{ needs.build.outputs.version }}.zip
+          asset_name: ${{ matrix.os }}-release-v${{ needs.build.outputs.version }}.zip
+          asset_content_type: application/zip
+
+  release:
+    name: Pushing Draft To Release
+
+    permissions:
+      contents: write
+      pull-requests: write
+
+    needs:
+      - draft
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Publish Release
+        uses: actions/github-script@v3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.repos.updateRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: ${{ needs.draft.outputs.release_id }},
+              draft: false
+            })      
